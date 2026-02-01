@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CogniScribe | Clinician Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        lavender: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 900: '#4c1d95' },
+                        primary: '#2e1065',
+                        accent: '#f472b6', /* Pink */
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F4F1FD] text-slate-800 font-sans selection:bg-accent selection:text-white flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-primary text-white hidden md:flex flex-col shadow-2xl z-20">
+        <div class="p-8 flex items-center gap-3 text-accent">
+            <i data-lucide="brain" class="w-8 h-8"></i>
+            <span class="text-xl font-serif font-bold tracking-tight text-white">CogniScribe</span>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <a href="/" class="flex items-center gap-3 px-6 py-4 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">
+                <i data-lucide="smartphone" class="w-5 h-5"></i>
+                <span class="font-medium">Patient View</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 text-white font-bold shadow-lg border border-white/5">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 text-accent"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-6 py-4 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span>Patients</span>
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary font-bold">Dr</div>
+                <div>
+                    <p class="text-sm font-bold">Dr. Smith</p>
+                    <p class="text-xs text-slate-400">Clinical Admin</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-8 relative">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
+
+        <header class="flex justify-between items-end mb-10 relative z-10">
+            <div>
+                <span class="text-xs font-bold text-primary bg-lavender-200 px-3 py-1 rounded-full uppercase tracking-wider">Patient Overview</span>
+                <h1 class="text-4xl font-serif font-bold text-primary mt-3">{{ data.name }}</h1>
+                <p class="text-slate-500 mt-1 flex items-center gap-2">ID: #{{ data.id }} • Last Session: <span class="font-bold text-primary">Today, 8:30 PM</span></p>
+            </div>
+            <button class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 shadow-sm flex items-center gap-2 transition">
+                <i data-lucide="download" class="w-4 h-4"></i> Export PDF
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-10">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-lavender-50 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+                        <i data-lucide="activity" class="w-6 h-6 text-primary group-hover:text-accent transition-colors"></i>
+                    </div>
+                    <span class="text-green-600 bg-green-50 px-2 py-1 rounded-lg text-xs font-bold">+{{ data.compliance_trend }}%</span>
+                </div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Compliance Rate</p>
+                <h3 class="text-4xl font-serif font-bold text-slate-800 mt-1">{{ data.compliance_rate }}%</h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-orange-50 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-orange-500 group-hover:text-white transition-colors"></i>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Reframes Completed</p>
+                <h3 class="text-4xl font-serif font-bold text-slate-800 mt-1">{{ data.reframes_this_week }}</h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-pink-50 rounded-2xl group-hover:bg-accent group-hover:text-white transition-colors">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 text-accent group-hover:text-white transition-colors"></i>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Top Trigger</p>
+                <h3 class="text-2xl font-serif font-bold text-slate-800 mt-2">{{ data.top_trigger }}</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-lg shadow-lavender-200/50 border border-white">
+                <h3 class="font-serif font-bold text-xl text-primary mb-8 flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5 text-accent"></i> Distortion Heatmap
+                </h3>
+
+                <div class="space-y-6">
+                    {% for item in data.heatmap %}
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-slate-700 font-bold">{{ item.label }}</span>
+                            <span class="text-slate-400">{{ item.value }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                            <div class="h-full rounded-full shadow-sm {{ item.color }} opacity-80" style="width: {{ item.value }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-primary text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-accent rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+
+                <div class="flex justify-between items-center mb-6 relative z-10">
+                    <h3 class="font-serif font-bold text-xl flex items-center gap-2">
+                        <i data-lucide="bot" class="w-5 h-5 text-accent"></i> Clinical Insight
+                    </h3>
+                    <span class="text-[10px] font-bold bg-white/10 px-2 py-1 rounded text-accent border border-white/10">AI GENERATED</span>
+                </div>
+
+                <div class="flex-1 relative z-10">
+                    <p class="leading-relaxed text-lavender-100 font-serif text-lg opacity-90">
+                        {{ data.summary }}
+                    </p>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex gap-4 relative z-10">
+                    <button class="flex-1 py-3 bg-white text-primary rounded-xl font-bold text-sm hover:bg-slate-100 transition">
+                        Full Report
+                    </button>
+                    <button class="flex-1 py-3 bg-accent text-white rounded-xl font-bold text-sm hover:bg-pink-500 transition shadow-lg shadow-pink-500/20">
+                        Add Note
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

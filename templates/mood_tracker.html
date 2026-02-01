@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CogniScribe | Mood Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'DM Sans', sans-serif; }
+        .font-serif { font-family: 'Merriweather', serif; font-weight: 700; }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Progress Bars */
+        .bar-container { background: #F3F0FF; border-radius: 99px; overflow: hidden; height: 12px; }
+        .bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease-out; }
+    </style>
+</head>
+<body class="bg-[#F3F0FF] h-screen overflow-hidden relative selection:bg-purple-200">
+
+    <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-300/30 rounded-full blur-[100px] animate-pulse"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-300/30 rounded-full blur-[100px]"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto h-full flex flex-col p-6">
+
+        <header class="flex items-center gap-4 py-6 mb-4 fade-in">
+            <a href="/home" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-[#2E1065] transition shadow-sm border border-purple-50">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-serif text-[#2E1065]">Mood Insights</h1>
+                <p class="text-slate-500 font-medium">Tracking your emotional journey.</p>
+            </div>
+        </header>
+
+        <main class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 min-h-0">
+
+            <div class="md:col-span-1 bg-white rounded-[32px] p-8 shadow-sm border border-white/60 flex flex-col fade-in overflow-y-auto" style="animation-delay: 0.1s;">
+                <h2 class="text-xl font-serif text-[#2E1065] mb-6">Distribution</h2>
+
+                <div class="mb-6">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="smile" class="w-4 h-4 text-green-500"></i> Happy</span>
+                        <span class="text-[#2E1065] font-bold">{{ stats.happy_pct }}%</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill bg-green-400" style="width: {{ stats.happy_pct }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="wind" class="w-4 h-4 text-blue-500"></i> Calm</span>
+                        <span class="text-[#2E1065] font-bold">{{ stats.calm_pct }}%</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill bg-blue-400" style="width: {{ stats.calm_pct }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="cloud-lightning" class="w-4 h-4 text-purple-600"></i> Anxious</span>
+                        <span class="text-[#2E1065] font-bold">{{ stats.anxious_pct }}%</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill bg-[#2E1065]" style="width: {{ stats.anxious_pct }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="cloud-rain" class="w-4 h-4 text-slate-500"></i> Low</span>
+                        <span class="text-[#2E1065] font-bold">{{ stats.low_pct }}%</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill bg-slate-400" style="width: {{ stats.low_pct }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-6 border-t border-slate-50">
+                    <div class="bg-purple-50 rounded-2xl p-4">
+                        <p class="text-purple-800 text-sm font-medium leading-relaxed">
+                            <i data-lucide="sparkles" class="w-4 h-4 inline mr-1"></i>
+                            You are feeling <strong>Calm</strong> more often this week compared to last week.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 bg-white rounded-[32px] p-8 shadow-sm border border-white/60 flex flex-col fade-in relative overflow-hidden" style="animation-delay: 0.2s;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-serif text-[#2E1065]">Recent Logs</h2>
+                    <span class="text-slate-400 text-sm font-bold">{{ stats.total_entries }} Entries</span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-2 space-y-4">
+                    {% if history|length == 0 %}
+                        <div class="text-center text-slate-400 py-10">No mood logs yet.</div>
+                    {% else %}
+                        {% for entry in history %}
+                        <div class="group p-5 rounded-2xl border border-slate-100 hover:border-purple-200 hover:bg-purple-50/50 transition flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0
+                                {% if entry.mood == 'Happy' %} bg-green-100 text-green-600
+                                {% elif entry.mood == 'Calm' %} bg-blue-100 text-blue-600
+                                {% elif entry.mood == 'Anxious' %} bg-[#2E1065] text-white
+                                {% else %} bg-slate-100 text-slate-500 {% endif %}">
+
+                                {% if entry.mood == 'Happy' %} <i data-lucide="smile" class="w-6 h-6"></i>
+                                {% elif entry.mood == 'Calm' %} <i data-lucide="wind" class="w-6 h-6"></i>
+                                {% elif entry.mood == 'Anxious' %} <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+                                {% else %} <i data-lucide="cloud-rain" class="w-6 h-6"></i> {% endif %}
+                            </div>
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold text-[#2E1065]">{{ entry.mood }}</h3>
+                                    <span class="text-xs font-bold text-slate-400 uppercase">{{ entry.date }} • {{ entry.time }}</span>
+                                </div>
+                                <p class="text-slate-500 text-sm line-clamp-2 leading-relaxed font-serif">
+                                    {{ entry.content }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

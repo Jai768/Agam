@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CogniScribe | Welcome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Recoleta:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .fade-up { animation: fadeUp 1s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        .delay-100 { animation-delay: 0.2s; }
+        .delay-200 { animation-delay: 0.4s; }
+        .delay-300 { animation-delay: 0.6s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Font Injection */
+        @font-face { font-family: 'Recoleta'; src: local('Georgia'); font-weight: bold; }
+        .font-serif { font-family: 'Recoleta', serif; }
+    </style>
+</head>
+<body class="bg-[#F3F0FF] h-screen flex flex-col overflow-hidden relative selection:bg-purple-200">
+
+    <nav class="px-10 py-6 flex justify-between items-center z-20">
+        <div class="flex items-center gap-2 text-[#2E1065] font-bold text-xl">
+            <i data-lucide="brain" class="w-8 h-8 text-[#F472B6]"></i> CogniScribe
+        </div>
+        <a href="#" class="text-sm font-bold text-slate-500 hover:text-[#2E1065] transition">Login</a>
+    </nav>
+
+    <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-300/30 rounded-full blur-[100px] animate-pulse"></div>
+    <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-pink-300/30 rounded-full blur-[100px]"></div>
+
+    <main class="flex-1 flex flex-col justify-center items-center text-center px-4 relative z-10">
+
+        <div class="mb-6 fade-up">
+            <span class="bg-white/60 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-[#6B21A8] border border-white uppercase tracking-wider shadow-sm">
+                AI Clinical Support Tool
+            </span>
+        </div>
+
+        <h1 class="text-6xl md:text-7xl font-serif text-[#2E1065] mb-6 leading-tight fade-up delay-100">
+            Rewire your thoughts,<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#6B21A8] to-[#F472B6]">reshape your reality.</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mb-10 fade-up delay-200 leading-relaxed">
+            CogniScribe isn't just a journal. It's an intelligent companion that helps you identify cognitive distortions and build healthier mental habits in real-time.
+        </p>
+
+        <a href="/onboarding" class="fade-up delay-300 group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-[#2E1065] font-serif rounded-2xl hover:bg-[#4C1D95] hover:shadow-lg hover:shadow-purple-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600">
+            Get Started
+            <i data-lucide="arrow-right" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+
+        <div class="mt-16 flex gap-8 opacity-50 fade-up delay-300 grayscale mix-blend-multiply">
+            <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-5 h-5"></i> HIPAA Compliant</div>
+            <div class="flex items-center gap-2"><i data-lucide="lock" class="w-5 h-5"></i> End-to-End Encrypted</div>
+        </div>
+
+    </main>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
