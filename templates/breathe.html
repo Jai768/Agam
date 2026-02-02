@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CogniScribe | Breathe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.8; }
+            40% { transform: scale(1.6); opacity: 1; } /* Inhale 4s */
+            60% { transform: scale(1.6); opacity: 1; } /* Hold 2s */
+            100% { transform: scale(1); opacity: 0.8; } /* Exhale 4s */
+        }
+        .orb {
+            width: 250px; height: 250px;
+            background: linear-gradient(135deg, #2DD4BF, #0F766E);
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(45, 212, 191, 0.4);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .orb.active { animation: breathe 10s infinite ease-in-out; }
+    </style>
+</head>
+<body class="bg-teal-50 h-screen flex flex-col items-center justify-center relative overflow-hidden">
+
+    <a href="/home" class="absolute top-6 left-6 w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-teal-600 shadow-sm z-20">
+        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+    </a>
+
+    <div class="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+        <div class="border border-teal-300 rounded-full w-[500px] h-[500px]"></div>
+        <div class="absolute border border-teal-300 rounded-full w-[700px] h-[700px]"></div>
+    </div>
+
+    <div class="relative z-10 text-center">
+        <div id="orb" class="orb mb-12 mx-auto transition-all duration-1000">
+            <span id="label" class="text-white font-serif text-2xl font-bold tracking-widest uppercase">Ready</span>
+        </div>
+
+        <button onclick="toggleSession()" id="btn" class="bg-white text-teal-800 px-10 py-4 rounded-2xl font-bold shadow-xl shadow-teal-900/10 hover:shadow-teal-900/20 hover:-translate-y-1 transition border border-teal-100 flex items-center gap-2 mx-auto">
+            <i data-lucide="play" class="w-5 h-5"></i> <span id="btn-txt">Start</span>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let running = false;
+        let timer;
+
+        function toggleSession() {
+            running = !running;
+            const orb = document.getElementById('orb');
+            const btnTxt = document.getElementById('btn-txt');
+            const label = document.getElementById('label');
+
+            if(running) {
+                orb.classList.add('active');
+                btnTxt.innerText = "Stop";
+                runCycle();
+                timer = setInterval(runCycle, 10000); // 10s cycle
+            } else {
+                orb.classList.remove('active');
+                btnTxt.innerText = "Start";
+                label.innerText = "Ready";
+                clearInterval(timer);
+            }
+        }
+
+        function runCycle() {
+            if(!running) return;
+            const label = document.getElementById('label');
+            label.innerText = "Inhale";
+            setTimeout(() => { if(running) label.innerText = "Hold" }, 4000);
+            setTimeout(() => { if(running) label.innerText = "Exhale" }, 6000);
+        }
+    </script>
+</body>
+</html>

@@ -4,7 +4,6 @@ import datetime
 app = Flask(__name__)
 
 # --- MOCK DATABASE ---
-# In a real app, this would be SQLite or PostgreSQL
 JOURNAL_DB = [
     {
         "id": 1,
@@ -23,6 +22,52 @@ JOURNAL_DB = [
         "mood": "Calm"
     }
 ]
+
+# --- THE REFRAME ENGINE (Defined Locally) ---
+REFRAME_MAP = {
+    "catastrophizing": {
+        "title": "Catastrophizing",
+        "keywords": ["fired", "ruined", "disaster", "suicide", "end", "mess", "commit"],
+        "message": "You are jumping to the absolute worst-case scenario.",
+        "alternative": "It's not the end of the world. This is a temporary crisis, and your value is not defined by this single event."
+    },
+    "mind_reading": {
+        "title": "Mind Reading",
+        "keywords": ["hates", "thinks", "judging", "because of me", "disappointed", "boss"],
+        "message": "You are assuming others have negative intentions without proof.",
+        "alternative": "They might be tired or stressed. You cannot know their thoughts unless they tell you."
+    },
+    "all_or_nothing": {
+        "title": "All-or-Nothing",
+        "keywords": ["always", "never", "everyone", "nobody", "perfect", "failure"],
+        "message": "You are seeing things in extremes (black or white).",
+        "alternative": "Life happens in the grey areas. A partial success is not a total failure."
+    }
+}
+
+
+def agent_detective(text):
+    text_lower = text.lower()
+    distortions = []
+
+    for key, data in REFRAME_MAP.items():
+        for word in data['keywords']:
+            if word in text_lower:
+                start_index = text_lower.find(word)
+                end_index = start_index + len(word)
+
+                distortions.append({
+                    "id": key,
+                    "word": word,
+                    "type": data['title'],
+                    "verdict": data['message'],
+                    "alternative": data['alternative'],
+                    "start": start_index,
+                    "end": end_index,
+                    "text": text[start_index:end_index]
+                })
+                break
+    return distortions
 
 
 # --- ROUTES ---
@@ -47,24 +92,23 @@ def editor():
     return render_template('editor.html')
 
 
-# Inside app.py
+@app.route('/breathe')
+def breathe():
+    return render_template('breathe.html')
+
+
+@app.route('/exercises')
+def exercises():
+    return render_template('therapist_exercises.html')
+
 
 @app.route('/mood-tracker')
 def mood_tracker():
-    """Step 4: Mood Analytics Page"""
-
-    # Calculate Mood Counts for the Chart
     mood_counts = {"Happy": 0, "Calm": 0, "Anxious": 0, "Low": 0}
-
     for entry in JOURNAL_DB:
         m = entry.get('mood', 'Neutral')
-        if m in mood_counts:
-            mood_counts[m] += 1
-
-    # Calculate total for percentages
-    total = sum(mood_counts.values())
-    if total == 0: total = 1  # Avoid div by zero
-
+        if m in mood_counts: mood_counts[m] += 1
+    total = sum(mood_counts.values()) or 1
     stats = {
         "happy_pct": int((mood_counts["Happy"] / total) * 100),
         "calm_pct": int((mood_counts["Calm"] / total) * 100),
@@ -72,30 +116,24 @@ def mood_tracker():
         "low_pct": int((mood_counts["Low"] / total) * 100),
         "total_entries": len(JOURNAL_DB)
     }
-
     return render_template('mood_tracker.html', stats=stats, history=JOURNAL_DB)
+
 
 @app.route('/dashboard')
 def dashboard():
-    # ... (Keep existing dashboard logic) ...
-    return render_template('dashboard.html',
-                           data={"name": "Sarina", "id": "8842", "compliance_rate": 85, "heatmap": []})
+    return render_template('dashboard.html', data={"name": "Sarina", "compliance_rate": 85})
 
 
-# --- API: JOURNAL HISTORY ---
+# --- API ---
 
 @app.route('/api/journal', methods=['GET'])
 def get_journal_history():
-    """Fetch all past entries"""
     return jsonify(JOURNAL_DB)
 
 
 @app.route('/api/journal/save', methods=['POST'])
 def save_entry():
-    """Save a new entry"""
     data = request.json
-
-    # Create new entry object
     new_entry = {
         "id": len(JOURNAL_DB) + 1,
         "date": datetime.datetime.now().strftime("%b %d, %Y"),
@@ -104,29 +142,8 @@ def save_entry():
         "content": data.get('content', ''),
         "mood": data.get('mood', 'Neutral')
     }
-
-    # Prepend to list (newest first)
     JOURNAL_DB.insert(0, new_entry)
-
     return jsonify({"status": "success", "entry": new_entry})
-
-
-# --- MOCK AI AGENT LOGIC (Keep existing) ---
-def agent_detective(text):
-    # ... (Keep existing detective logic) ...
-    distortions = []
-    triggers = {"boss": "Mind Reading", "hates": "Mind Reading", "fired": "Fortune Telling", "mess": "All-or-Nothing"}
-    lower_text = text.lower()
-    for keyword, type_val in triggers.items():
-        if keyword in lower_text:
-            start = lower_text.find(keyword)
-            distortions.append({
-                "text": text[start:start + len(keyword)],
-                "start": start,
-                "end": start + len(keyword),
-                "type": type_val
-            })
-    return distortions
 
 
 @app.route('/api/analyze', methods=['POST'])

@@ -2,137 +2,147 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CogniScribe | Mood Tracker</title>
+    <title>Agam | Mood History</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'DM Sans', sans-serif; }
-        .font-serif { font-family: 'Merriweather', serif; font-weight: 700; }
-        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .font-serif { font-family: 'Merriweather', serif; }
 
         /* Custom Progress Bars */
-        .bar-container { background: #F3F0FF; border-radius: 99px; overflow: hidden; height: 12px; }
-        .bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease-out; }
+        .bar-bg { background: #F3F0FF; border-radius: 99px; height: 8px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 99px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Hide Scrollbar for cleaner look */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-[#F3F0FF] h-screen overflow-hidden relative selection:bg-purple-200">
+<body class="bg-[#F4F1FD] h-screen overflow-hidden flex flex-col selection:bg-purple-200">
 
-    <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-300/30 rounded-full blur-[100px] animate-pulse"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-300/30 rounded-full blur-[100px]"></div>
+    <header class="flex items-center gap-4 px-8 py-6 z-10">
+        <a href="/home" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-[#2E1065] shadow-sm border border-purple-50 transition-all hover:scale-105">
+            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-[#2E1065]">Mood History</h1>
+            <p class="text-slate-500 font-medium">Your emotional journey, day by day.</p>
+        </div>
+    </header>
 
-    <div class="relative z-10 max-w-5xl mx-auto h-full flex flex-col p-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden">
 
-        <header class="flex items-center gap-4 py-6 mb-4 fade-in">
-            <a href="/home" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-[#2E1065] transition shadow-sm border border-purple-50">
-                <i data-lucide="arrow-left" class="w-6 h-6"></i>
-            </a>
+        <div class="lg:col-span-1 bg-white rounded-[2.5rem] p-8 shadow-xl shadow-purple-200/50 flex flex-col justify-between overflow-y-auto border border-white">
             <div>
-                <h1 class="text-3xl font-serif text-[#2E1065]">Mood Insights</h1>
-                <p class="text-slate-500 font-medium">Tracking your emotional journey.</p>
-            </div>
-        </header>
+                <h2 class="text-xl font-serif font-bold text-[#2E1065] mb-8 flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="w-5 h-5 text-pink-400"></i> Distribution
+                </h2>
 
-        <main class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 min-h-0">
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between text-sm mb-2 font-bold">
+                            <span class="text-slate-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-400"></div> Happy</span>
+                            <span class="text-[#2E1065]">{{ stats.happy_pct }}%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill bg-green-400" style="width: {{ stats.happy_pct }}%"></div></div>
+                    </div>
 
-            <div class="md:col-span-1 bg-white rounded-[32px] p-8 shadow-sm border border-white/60 flex flex-col fade-in overflow-y-auto" style="animation-delay: 0.1s;">
-                <h2 class="text-xl font-serif text-[#2E1065] mb-6">Distribution</h2>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2 font-bold">
+                            <span class="text-slate-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-400"></div> Calm</span>
+                            <span class="text-[#2E1065]">{{ stats.calm_pct }}%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill bg-blue-400" style="width: {{ stats.calm_pct }}%"></div></div>
+                    </div>
 
-                <div class="mb-6">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="smile" class="w-4 h-4 text-green-500"></i> Happy</span>
-                        <span class="text-[#2E1065] font-bold">{{ stats.happy_pct }}%</span>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2 font-bold">
+                            <span class="text-slate-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-purple-600"></div> Anxious</span>
+                            <span class="text-[#2E1065]">{{ stats.anxious_pct }}%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill bg-purple-600" style="width: {{ stats.anxious_pct }}%"></div></div>
                     </div>
-                    <div class="bar-container">
-                        <div class="bar-fill bg-green-400" style="width: {{ stats.happy_pct }}%"></div>
-                    </div>
-                </div>
 
-                <div class="mb-6">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="wind" class="w-4 h-4 text-blue-500"></i> Calm</span>
-                        <span class="text-[#2E1065] font-bold">{{ stats.calm_pct }}%</span>
-                    </div>
-                    <div class="bar-container">
-                        <div class="bar-fill bg-blue-400" style="width: {{ stats.calm_pct }}%"></div>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="cloud-lightning" class="w-4 h-4 text-purple-600"></i> Anxious</span>
-                        <span class="text-[#2E1065] font-bold">{{ stats.anxious_pct }}%</span>
-                    </div>
-                    <div class="bar-container">
-                        <div class="bar-fill bg-[#2E1065]" style="width: {{ stats.anxious_pct }}%"></div>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-slate-500 font-bold text-sm flex items-center gap-2"><i data-lucide="cloud-rain" class="w-4 h-4 text-slate-500"></i> Low</span>
-                        <span class="text-[#2E1065] font-bold">{{ stats.low_pct }}%</span>
-                    </div>
-                    <div class="bar-container">
-                        <div class="bar-fill bg-slate-400" style="width: {{ stats.low_pct }}%"></div>
-                    </div>
-                </div>
-
-                <div class="mt-auto pt-6 border-t border-slate-50">
-                    <div class="bg-purple-50 rounded-2xl p-4">
-                        <p class="text-purple-800 text-sm font-medium leading-relaxed">
-                            <i data-lucide="sparkles" class="w-4 h-4 inline mr-1"></i>
-                            You are feeling <strong>Calm</strong> more often this week compared to last week.
-                        </p>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2 font-bold">
+                            <span class="text-slate-500 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-slate-400"></div> Low</span>
+                            <span class="text-[#2E1065]">{{ stats.low_pct }}%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill bg-slate-400" style="width: {{ stats.low_pct }}%"></div></div>
                     </div>
                 </div>
             </div>
 
-            <div class="md:col-span-2 bg-white rounded-[32px] p-8 shadow-sm border border-white/60 flex flex-col fade-in relative overflow-hidden" style="animation-delay: 0.2s;">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-serif text-[#2E1065]">Recent Logs</h2>
-                    <span class="text-slate-400 text-sm font-bold">{{ stats.total_entries }} Entries</span>
-                </div>
+            <div class="bg-[#F8F6FF] p-5 rounded-3xl mt-8 border border-purple-50">
+                <p class="text-[#4C1D95] text-sm font-medium leading-relaxed">
+                    <i data-lucide="sparkles" class="w-4 h-4 inline mr-1 text-pink-500"></i>
+                    You've logged <strong>{{ stats.total_entries }} entries</strong>. Consistency helps the AI find better patterns for you!
+                </p>
+            </div>
+        </div>
 
-                <div class="flex-1 overflow-y-auto pr-2 space-y-4">
-                    {% if history|length == 0 %}
-                        <div class="text-center text-slate-400 py-10">No mood logs yet.</div>
-                    {% else %}
-                        {% for entry in history %}
-                        <div class="group p-5 rounded-2xl border border-slate-100 hover:border-purple-200 hover:bg-purple-50/50 transition flex items-start gap-4">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0
-                                {% if entry.mood == 'Happy' %} bg-green-100 text-green-600
-                                {% elif entry.mood == 'Calm' %} bg-blue-100 text-blue-600
-                                {% elif entry.mood == 'Anxious' %} bg-[#2E1065] text-white
-                                {% else %} bg-slate-100 text-slate-500 {% endif %}">
+        <div class="lg:col-span-2 flex flex-col h-full relative overflow-hidden">
+            <h2 class="text-xl font-serif font-bold text-[#2E1065] mb-6 pl-2 flex items-center gap-2">
+                <i data-lucide="calendar" class="w-5 h-5 text-pink-400"></i> Recent Logs
+            </h2>
 
-                                {% if entry.mood == 'Happy' %} <i data-lucide="smile" class="w-6 h-6"></i>
-                                {% elif entry.mood == 'Calm' %} <i data-lucide="wind" class="w-6 h-6"></i>
-                                {% elif entry.mood == 'Anxious' %} <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
-                                {% else %} <i data-lucide="cloud-rain" class="w-6 h-6"></i> {% endif %}
+            <div class="flex-1 overflow-y-auto pr-4 pb-4 space-y-4 no-scrollbar">
+                {% if history|length == 0 %}
+                    <div class="h-full flex flex-col items-center justify-center text-slate-400 bg-white/50 rounded-[2.5rem] border border-dashed border-slate-300">
+                        <i data-lucide="book-open" class="w-12 h-12 mb-4 opacity-50 text-purple-300"></i>
+                        <p class="font-medium">Your journal is waiting for the first story.</p>
+                    </div>
+                {% else %}
+                    {% for entry in history %}
+
+                    {% set card_bg = 'bg-slate-50 border-slate-100' %}
+                    {% set icon_bg = 'bg-slate-200 text-slate-500' %}
+                    {% set icon_name = 'cloud-rain' %}
+
+                    {% if entry.mood == 'Happy' %}
+                        {% set card_bg = 'bg-green-50/50 border-green-100 hover:bg-green-50' %}
+                        {% set icon_bg = 'bg-green-100 text-green-600' %}
+                        {% set icon_name = 'smile' %}
+                    {% elif entry.mood == 'Calm' %}
+                        {% set card_bg = 'bg-sky-50/50 border-sky-100 hover:bg-sky-50' %}
+                        {% set icon_bg = 'bg-sky-100 text-sky-600' %}
+                        {% set icon_name = 'wind' %}
+                    {% elif entry.mood == 'Anxious' %}
+                        {% set card_bg = 'bg-purple-50/50 border-purple-100 hover:bg-purple-50' %}
+                        {% set icon_bg = 'bg-[#2E1065] text-white' %}
+                        {% set icon_name = 'cloud-lightning' %}
+                    {% endif %}
+
+                    <div class="group flex flex-col md:flex-row gap-5 p-6 rounded-[2rem] border {{ card_bg }} transition-all duration-300 hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-1">
+
+                        <div class="flex md:flex-col items-center md:items-start gap-3 md:w-24 shrink-0 border-b md:border-b-0 md:border-r border-slate-200/50 pb-3 md:pb-0 md:pr-4">
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm {{ icon_bg }}">
+                                <i data-lucide="{{ icon_name }}"></i>
                             </div>
-
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center mb-1">
-                                    <h3 class="font-bold text-[#2E1065]">{{ entry.mood }}</h3>
-                                    <span class="text-xs font-bold text-slate-400 uppercase">{{ entry.date }} • {{ entry.time }}</span>
-                                </div>
-                                <p class="text-slate-500 text-sm line-clamp-2 leading-relaxed font-serif">
-                                    {{ entry.content }}
-                                </p>
+                            <div class="text-left">
+                                <span class="block font-serif font-bold text-slate-700 text-lg">{{ entry.mood }}</span>
                             </div>
                         </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
+
+                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest bg-white/60 px-2 py-1 rounded-lg">
+                                    {{ entry.date }} • {{ entry.time }}
+                                </span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed font-serif italic opacity-90">
+                                "{{ entry.content }}"
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
             </div>
+        </div>
 
-        </main>
-    </div>
+    </main>
 
-    <script>
-        lucide.createIcons();
-    </script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

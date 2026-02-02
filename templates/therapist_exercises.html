@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CogniScribe | Reflection Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'DM Sans', sans-serif; overflow: hidden; }
+        .font-serif { font-family: 'Merriweather', serif; font-weight: 700; }
+
+        /* Soothing Aurora Background */
+        .aurora-bg {
+            background: linear-gradient(-45deg, #F3F0FF, #e0e7ff, #fae8ff, #F3F0FF);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Smooth Transition for Questions */
+        .question-card {
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+        }
+        .question-card.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+            position: relative;
+        }
+        .question-card.passed {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.95);
+            pointer-events: none;
+            position: absolute;
+        }
+
+        /* Gamified Option Cards */
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .option-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(46, 16, 101, 0.1); }
+        .option-btn.selected {
+            background-color: #2E1065;
+            color: white;
+            border-color: #2E1065;
+            transform: scale(1.02);
+        }
+
+        /* Tree Growth Animation */
+        #tree-svg path { transition: all 1s ease-in-out; transform-origin: bottom center; }
+        .branch-hidden { transform: scale(0); opacity: 0; }
+        .branch-visible { transform: scale(1); opacity: 1; }
+
+        /* Float Animation for Tree Container */
+        @keyframes floatTree {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .tree-float { animation: floatTree 6s ease-in-out infinite; }
+    </style>
+</head>
+<body class="aurora-bg h-screen flex flex-col selection:bg-purple-200">
+
+    <header class="flex items-center justify-between px-8 py-6 z-10">
+        <a href="/home" class="w-12 h-12 bg-white/50 backdrop-blur rounded-2xl flex items-center justify-center text-slate-500 hover:text-[#2E1065] shadow-sm transition-all hover:scale-105">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </a>
+
+        <div class="flex-1 mx-6 md:mx-12 max-w-xl">
+            <div class="flex justify-between text-xs font-bold text-[#2E1065] mb-2 uppercase tracking-widest">
+                <span>Anxiety Check-in</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="h-2 bg-white/50 rounded-full overflow-hidden">
+                <div id="progress-fill" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 w-0 transition-all duration-700 ease-out"></div>
+            </div>
+        </div>
+
+        <div class="w-12"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center overflow-hidden">
+
+        <div class="w-full max-w-xl mx-auto lg:mx-0 relative z-20 order-2 lg:order-1 h-full flex flex-col justify-center">
+            <div id="question-container" class="relative min-h-[400px]">
+                </div>
+
+            <div class="mt-8 flex items-center gap-6">
+                <button id="prev-btn" onclick="prevStep()" class="opacity-0 px-6 py-3 rounded-xl font-bold text-slate-400 hover:bg-white/50 transition flex items-center gap-2 pointer-events-none">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+                </button>
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    Step <span id="step-count">1</span> of 7
+                </div>
+            </div>
+        </div>
+
+        <div class="relative flex items-center justify-center order-1 lg:order-2 h-64 lg:h-full" id="tree-container">
+            <div class="w-[280px] h-[280px] md:w-[450px] md:h-[450px] bg-white/30 backdrop-blur-md rounded-full shadow-2xl border border-white/40 flex items-center justify-center tree-float relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-green-50/30 pointer-events-none"></div>
+
+                <svg viewBox="0 0 200 200" id="tree-svg" class="w-full h-full drop-shadow-lg transform translate-y-6">
+                    <path d="M100 200 L100 150" stroke="#8B5A2B" stroke-width="8" stroke-linecap="round" />
+
+                    <g id="branch-1" class="branch-hidden"><path d="M100 150 Q80 120 60 130" stroke="#8B5A2B" stroke-width="4" fill="none"/><circle cx="60" cy="130" r="10" fill="#4ADE80" /></g>
+                    <g id="branch-2" class="branch-hidden"><path d="M100 150 Q120 120 140 130" stroke="#8B5A2B" stroke-width="4" fill="none"/><circle cx="140" cy="130" r="12" fill="#22C55E" /></g>
+                    <g id="branch-3" class="branch-hidden"><path d="M100 150 Q100 110 100 90" stroke="#8B5A2B" stroke-width="5" fill="none"/><circle cx="100" cy="90" r="15" fill="#16A34A" /></g>
+                    <g id="branch-4" class="branch-hidden"><path d="M100 90 Q80 60 50 70" stroke="#8B5A2B" stroke-width="3" fill="none"/><circle cx="50" cy="70" r="8" fill="#86EFAC" /></g>
+                    <g id="branch-5" class="branch-hidden"><path d="M100 90 Q120 60 150 70" stroke="#8B5A2B" stroke-width="3" fill="none"/><circle cx="150" cy="70" r="9" fill="#BBF7D0" /></g>
+                    <g id="branch-6" class="branch-hidden"><path d="M100 90 Q100 50 100 30" stroke="#8B5A2B" stroke-width="3" fill="none"/><circle cx="100" cy="30" r="10" fill="#DCFCE7" /></g>
+                    <g id="branch-7" class="branch-hidden"><path d="M100 30 Q80 10 70 20" stroke="#8B5A2B" stroke-width="2" fill="none"/><circle cx="70" cy="20" r="5" fill="#F472B6" /></g>
+                </svg>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // GAD-7 Questions
+        const questions = [
+            "Feeling nervous, anxious, or on edge",
+            "Not being able to stop or control worrying",
+            "Worrying too much about different things",
+            "Trouble relaxing",
+            "Being so restless that it is hard to sit still",
+            "Becoming easily annoyed or irritable",
+            "Feeling afraid as if something awful might happen"
+        ];
+
+        const options = [
+            { label: "Not at all", value: 0 },
+            { label: "Several days", value: 1 },
+            { label: "More than half the days", value: 2 },
+            { label: "Nearly every day", value: 3 }
+        ];
+
+        let currentStep = 0;
+        const answers = new Array(questions.length).fill(null);
+        const container = document.getElementById('question-container');
+
+        // Initialize UI
+        function init() {
+            container.innerHTML = questions.map((q, idx) => `
+                <div class="question-card ${idx === 0 ? 'active' : ''}" id="card-${idx}">
+                    <h2 class="text-3xl md:text-4xl font-serif text-[#2E1065] mb-8 leading-tight text-center md:text-left">
+                        ${q}
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${options.map((opt, optIdx) => `
+                            <button onclick="selectOption(${idx}, ${opt.value}, this)"
+                                class="option-btn bg-white/60 backdrop-blur border-2 border-white p-5 rounded-2xl text-left flex items-center justify-between group">
+                                <span class="font-bold text-lg text-slate-700 group-hover:text-[#2E1065] transition-colors">${opt.label}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-[#2E1065] flex items-center justify-center">
+                                    <div class="w-3 h-3 rounded-full bg-white opacity-0 transition-opacity"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            updateProgress();
+        }
+
+        function selectOption(qIdx, value, btnElement) {
+            // Visual Selection
+            const card = document.getElementById(`card-${qIdx}`);
+            card.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btnElement.classList.add('selected');
+
+            // Save Answer
+            answers[qIdx] = value;
+
+            // Gamification: Grow the tree
+            const branch = document.getElementById(`branch-${qIdx + 1}`);
+            if(branch) branch.classList.remove('branch-hidden');
+            if(branch) branch.classList.add('branch-visible');
+
+            // Wait a moment then go next
+            setTimeout(() => nextStep(), 400);
+        }
+
+        function nextStep() {
+            if (currentStep < questions.length - 1) {
+                // Animate Out Current
+                document.getElementById(`card-${currentStep}`).classList.remove('active');
+                document.getElementById(`card-${currentStep}`).classList.add('passed');
+
+                currentStep++;
+
+                // Animate In Next
+                document.getElementById(`card-${currentStep}`).classList.add('active');
+
+                updateProgress();
+                updateNav();
+            } else {
+                finishSession();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                 document.getElementById(`card-${currentStep}`).classList.remove('active');
+
+                 currentStep--;
+
+                 document.getElementById(`card-${currentStep}`).classList.remove('passed');
+                 document.getElementById(`card-${currentStep}`).classList.add('active');
+
+                 updateProgress();
+                 updateNav();
+            }
+        }
+
+        function updateProgress() {
+            const pct = Math.round(((currentStep) / questions.length) * 100);
+            document.getElementById('progress-fill').style.width = `${pct}%`;
+            document.getElementById('progress-text').innerText = `${pct}%`;
+        }
+
+        function updateNav() {
+            document.getElementById('step-count').innerText = currentStep + 1;
+            const prevBtn = document.getElementById('prev-btn');
+
+            if (currentStep > 0) {
+                prevBtn.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                prevBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function finishSession() {
+            document.getElementById('progress-fill').style.width = `100%`;
+
+            // Celebration
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#F472B6', '#6B21A8', '#2E1065']
+            });
+
+            // Calculate Score
+            const score = answers.reduce((a, b) => a + b, 0);
+            let feedback = "Mild Anxiety";
+            if (score >= 10) feedback = "Moderate Anxiety";
+            if (score >= 15) feedback = "Severe Anxiety";
+
+            // Replace Container with Result
+            container.innerHTML = `
+                <div class="bg-white/80 backdrop-blur p-10 rounded-[40px] shadow-2xl text-center border border-white animate-in zoom-in duration-500">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                        <i data-lucide="check" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-3xl font-serif text-[#2E1065] mb-2">Check-in Complete</h2>
+                    <p class="text-slate-500 mb-6">Your mental garden is growing.</p>
+
+                    <div class="bg-purple-50 p-6 rounded-2xl mb-8">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">GAD-7 Score</p>
+                        <p class="text-4xl font-bold text-[#2E1065]">${score} <span class="text-lg font-medium text-slate-400">/ 21</span></p>
+                        <p class="text-sm font-bold text-purple-600 mt-2">${feedback}</p>
+                    </div>
+
+                    <a href="/home" class="inline-flex bg-[#2E1065] text-white px-8 py-4 rounded-xl font-bold hover:bg-purple-900 transition shadow-lg shadow-purple-900/20">
+                        Return to Dashboard
+                    </a>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -2,163 +2,218 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CogniScribe | Clinician Dashboard</title>
+    <title>CogniScribe | Insights</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Merriweather', 'serif'],
-                    },
-                    colors: {
-                        lavender: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 900: '#4c1d95' },
-                        primary: '#2e1065',
-                        accent: '#f472b6', /* Pink */
-                    }
-                }
-            }
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Animation for the graph bars growing upward */
+        .graph-bar {
+            transition: height 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            height: 0;
         }
-    </script>
+        .load-graph .graph-bar { height: var(--h); }
+
+        /* Soothing Gradient Text */
+        .text-gradient {
+            background: linear-gradient(to right, #2E1065, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="bg-[#F4F1FD] text-slate-800 font-sans selection:bg-accent selection:text-white flex h-screen overflow-hidden">
+<body class="bg-[#F3F0FF] h-screen overflow-hidden relative selection:bg-purple-200 aurora-bg">
 
-    <aside class="w-64 bg-primary text-white hidden md:flex flex-col shadow-2xl z-20">
-        <div class="p-8 flex items-center gap-3 text-accent">
-            <i data-lucide="brain" class="w-8 h-8"></i>
-            <span class="text-xl font-serif font-bold tracking-tight text-white">CogniScribe</span>
-        </div>
+    <div class="relative z-10 max-w-7xl mx-auto h-full flex flex-col p-6 md:p-8">
 
-        <nav class="flex-1 px-4 space-y-2 mt-4">
-            <a href="/" class="flex items-center gap-3 px-6 py-4 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">
-                <i data-lucide="smartphone" class="w-5 h-5"></i>
-                <span class="font-medium">Patient View</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 text-white font-bold shadow-lg border border-white/5">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 text-accent"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-6 py-4 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span>Patients</span>
-            </a>
-        </nav>
-
-        <div class="p-6 border-t border-white/10">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary font-bold">Dr</div>
+        <header class="flex justify-between items-center py-4 mb-6 fade-in-up">
+            <div class="flex items-center gap-4">
+                <a href="/home" class="w-12 h-12 glass-panel rounded-full flex items-center justify-center text-slate-400 hover:text-[#2E1065] transition shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
                 <div>
-                    <p class="text-sm font-bold">Dr. Smith</p>
-                    <p class="text-xs text-slate-400">Clinical Admin</p>
+                    <h1 class="text-3xl font-bold text-[#2E1065] font-serif">Your Insights</h1>
+                    <p class="text-slate-500 font-medium text-sm">Weekly analysis of your emotional landscape.</p>
                 </div>
             </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 overflow-y-auto p-8 relative">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
-
-        <header class="flex justify-between items-end mb-10 relative z-10">
-            <div>
-                <span class="text-xs font-bold text-primary bg-lavender-200 px-3 py-1 rounded-full uppercase tracking-wider">Patient Overview</span>
-                <h1 class="text-4xl font-serif font-bold text-primary mt-3">{{ data.name }}</h1>
-                <p class="text-slate-500 mt-1 flex items-center gap-2">ID: #{{ data.id }} • Last Session: <span class="font-bold text-primary">Today, 8:30 PM</span></p>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-[#2E1065] bg-purple-100 px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-3 h-3"></i> Oct 20 - Oct 27
+                </span>
             </div>
-            <button class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 shadow-sm flex items-center gap-2 transition">
-                <i data-lucide="download" class="w-4 h-4"></i> Export PDF
-            </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-10">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-lavender-50 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
-                        <i data-lucide="activity" class="w-6 h-6 text-primary group-hover:text-accent transition-colors"></i>
-                    </div>
-                    <span class="text-green-600 bg-green-50 px-2 py-1 rounded-lg text-xs font-bold">+{{ data.compliance_trend }}%</span>
-                </div>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Compliance Rate</p>
-                <h3 class="text-4xl font-serif font-bold text-slate-800 mt-1">{{ data.compliance_rate }}%</h3>
-            </div>
+        <main class="flex-1 overflow-y-auto pr-2 pb-6 no-scrollbar grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in-up delay-100">
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-orange-50 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                        <i data-lucide="sparkles" class="w-6 h-6 text-orange-500 group-hover:text-white transition-colors"></i>
-                    </div>
-                </div>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Reframes Completed</p>
-                <h3 class="text-4xl font-serif font-bold text-slate-800 mt-1">{{ data.reframes_this_week }}</h3>
-            </div>
+            <div class="space-y-6">
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-pink-50 rounded-2xl group-hover:bg-accent group-hover:text-white transition-colors">
-                        <i data-lucide="alert-triangle" class="w-6 h-6 text-accent group-hover:text-white transition-colors"></i>
-                    </div>
-                </div>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-wide">Top Trigger</p>
-                <h3 class="text-2xl font-serif font-bold text-slate-800 mt-2">{{ data.top_trigger }}</h3>
-            </div>
-        </div>
+                <div class="glass-card p-8 rounded-[2.5rem] flex flex-col items-center text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 opacity-50"></div>
+                    <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">Anxiety Level</h3>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
-
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-lg shadow-lavender-200/50 border border-white">
-                <h3 class="font-serif font-bold text-xl text-primary mb-8 flex items-center gap-2">
-                    <i data-lucide="bar-chart-2" class="w-5 h-5 text-accent"></i> Distortion Heatmap
-                </h3>
-
-                <div class="space-y-6">
-                    {% for item in data.heatmap %}
-                    <div>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-slate-700 font-bold">{{ item.label }}</span>
-                            <span class="text-slate-400">{{ item.value }}%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                            <div class="h-full rounded-full shadow-sm {{ item.color }} opacity-80" style="width: {{ item.value }}%"></div>
+                    <div class="w-48 h-48 rounded-full bg-slate-50 relative flex items-center justify-center mb-4 shadow-inner"
+                         style="background: conic-gradient(#F472B6 0% 45%, #e2e8f0 45% 100%); transition: background 1s ease;">
+                        <div class="w-36 h-36 bg-white rounded-full flex flex-col items-center justify-center shadow-lg shadow-purple-50">
+                            <span class="text-5xl font-serif font-bold text-[#2E1065]">9</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Mild</span>
                         </div>
                     </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="bg-primary text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-accent rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
-
-                <div class="flex justify-between items-center mb-6 relative z-10">
-                    <h3 class="font-serif font-bold text-xl flex items-center gap-2">
-                        <i data-lucide="bot" class="w-5 h-5 text-accent"></i> Clinical Insight
-                    </h3>
-                    <span class="text-[10px] font-bold bg-white/10 px-2 py-1 rounded text-accent border border-white/10">AI GENERATED</span>
-                </div>
-
-                <div class="flex-1 relative z-10">
-                    <p class="leading-relaxed text-lavender-100 font-serif text-lg opacity-90">
-                        {{ data.summary }}
+                    <p class="text-slate-500 text-sm px-4 leading-relaxed">
+                        Your anxiety baseline is <span class="text-green-600 font-bold">stable</span>. Lower than 75% of your past weeks.
                     </p>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10 flex gap-4 relative z-10">
-                    <button class="flex-1 py-3 bg-white text-primary rounded-xl font-bold text-sm hover:bg-slate-100 transition">
-                        Full Report
-                    </button>
-                    <button class="flex-1 py-3 bg-accent text-white rounded-xl font-bold text-sm hover:bg-pink-500 transition shadow-lg shadow-pink-500/20">
-                        Add Note
-                    </button>
+                <div class="glass-card p-8 rounded-[2.5rem] relative overflow-hidden">
+                    <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">Emotional Intensity</h3>
+
+                    <div class="flex justify-between items-end mb-3">
+                        <span class="text-3xl font-serif font-bold text-[#2E1065]">Moderate</span>
+                        <span class="text-xs font-bold text-purple-500 bg-purple-50 px-2 py-1 rounded">Peak: Tuesday</span>
+                    </div>
+
+                    <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden flex relative">
+                        <div class="h-full bg-blue-200 w-1/3 border-r border-white"></div>
+                        <div class="h-full bg-purple-300 w-1/3 border-r border-white"></div>
+                        <div class="h-full bg-pink-300 w-1/3"></div>
+
+                        <div class="absolute top-0 bottom-0 w-1 bg-[#2E1065] shadow-[0_0_10px_rgba(46,16,101,0.5)] left-[55%] transform -translate-x-1/2 rounded-full"></div>
+                    </div>
+
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-2 uppercase">
+                        <span>Calm</span>
+                        <span>Balanced</span>
+                        <span>Intense</span>
+                    </div>
                 </div>
+
             </div>
 
-        </div>
-    </main>
+            <div class="lg:col-span-2 space-y-6">
+
+                <div class="glass-card p-8 rounded-[2.5rem] min-h-[320px] flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-serif font-bold text-[#2E1065]">Emotional Patterns</h3>
+                            <p class="text-slate-400 text-sm">Mood stability over the last 7 days.</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-400"></span><span class="text-[10px] font-bold text-slate-400 uppercase">Positive</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-purple-400"></span><span class="text-[10px] font-bold text-slate-400 uppercase">Anxious</span></div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex items-end justify-between gap-3 md:gap-6 px-2 load-graph border-b border-slate-100 pb-2" id="mood-graph">
+
+                        <div class="w-full bg-purple-50 rounded-t-2xl relative group graph-bar hover:bg-purple-100 transition-colors" style="--h: 40%">
+                            <div class="absolute bottom-0 w-full bg-purple-400 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">M</span>
+                        </div>
+
+                        <div class="w-full bg-green-50 rounded-t-2xl relative group graph-bar hover:bg-green-100 transition-colors" style="--h: 70%">
+                            <div class="absolute bottom-0 w-full bg-green-400 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">T</span>
+                        </div>
+
+                        <div class="w-full bg-blue-50 rounded-t-2xl relative group graph-bar hover:bg-blue-100 transition-colors" style="--h: 55%">
+                            <div class="absolute bottom-0 w-full bg-blue-400 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">W</span>
+                        </div>
+
+                        <div class="w-full bg-purple-50 rounded-t-2xl relative group graph-bar hover:bg-purple-100 transition-colors" style="--h: 85%">
+                            <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#2E1065] text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">High</div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">T</span>
+                        </div>
+
+                        <div class="w-full bg-green-50 rounded-t-2xl relative group graph-bar hover:bg-green-100 transition-colors" style="--h: 60%">
+                            <div class="absolute bottom-0 w-full bg-green-400 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">F</span>
+                        </div>
+
+                        <div class="w-full bg-slate-100 rounded-t-2xl relative group graph-bar hover:bg-slate-200 transition-colors" style="--h: 30%">
+                            <div class="absolute bottom-0 w-full bg-slate-400 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">S</span>
+                        </div>
+
+                        <div class="w-full bg-green-50 rounded-t-2xl relative group graph-bar hover:bg-green-100 transition-colors" style="--h: 90%">
+                            <div class="absolute bottom-0 w-full bg-green-500 rounded-t-2xl h-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="absolute -bottom-8 w-full text-center text-xs font-bold text-slate-400 group-hover:text-[#2E1065] transition">S</span>
+                        </div>
+                    </div>
+                    <div class="h-4"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <div class="glass-card p-8 rounded-[2.5rem]">
+                        <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">Repeated Distortions</h3>
+                        <div class="space-y-5">
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-bold text-slate-700 mb-2">
+                                    <span class="flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i> Catastrophizing</span>
+                                    <span class="text-slate-400">45%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-red-400 w-[45%] rounded-full shadow-[0_0_10px_rgba(248,113,113,0.3)]"></div>
+                                </div>
+                            </div>
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-bold text-slate-700 mb-2">
+                                    <span class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-orange-400"></i> Mind Reading</span>
+                                    <span class="text-slate-400">30%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-orange-400 w-[30%] rounded-full shadow-[0_0_10px_rgba(251,146,60,0.3)]"></div>
+                                </div>
+                            </div>
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-bold text-slate-700 mb-2">
+                                    <span class="flex items-center gap-2"><i data-lucide="scale" class="w-4 h-4 text-yellow-400"></i> All-or-Nothing</span>
+                                    <span class="text-slate-400">15%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-yellow-400 w-[15%] rounded-full shadow-[0_0_10px_rgba(250,204,21,0.3)]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-[2.5rem]">
+                        <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">Range of Emotions</h3>
+
+                        <div class="flex flex-wrap gap-2 content-start min-h-[100px]">
+                            <span class="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-bold border border-green-200">Joyful</span>
+                            <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-bold border border-blue-200">Calm</span>
+                            <span class="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-bold border border-purple-200">Anxious</span>
+                            <span class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold border border-slate-200">Tired</span>
+                            <span class="px-4 py-2 bg-pink-100 text-pink-700 rounded-xl text-sm font-bold border border-pink-200">Grateful</span>
+                            <span class="px-4 py-2 bg-orange-100 text-orange-700 rounded-xl text-sm font-bold border border-orange-200">Frustrated</span>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t border-slate-50">
+                            <p class="text-sm text-slate-500 leading-relaxed">
+                                You experienced a <strong class="text-[#2E1065]">broad emotional range</strong> this week. This flexibility indicates healthy emotional processing.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
 
     <script>
         lucide.createIcons();
+
+        // Trigger graph animation on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('mood-graph').classList.add('load-graph');
+            }, 300);
+        });
     </script>
 </body>
 </html>
